@@ -14,6 +14,7 @@ import {
   type PrerenderStorePPR,
   type PrerenderStoreLegacy,
   type PrerenderStoreModern,
+  type PrerenderStoreModernDynamic,
 } from '../app-render/work-unit-async-storage.external'
 import { InvariantError } from '../../shared/lib/invariant-error'
 import {
@@ -74,6 +75,10 @@ export function createParamsFromClient(
         throw new InvariantError(
           'createParamsFromClient should not be called in cache contexts.'
         )
+      case 'prerender-runtime':
+        throw new InvariantError(
+          'createParamsFromClient should not be called in a runtime prerender.'
+        )
       case 'request':
         break
       default:
@@ -106,6 +111,7 @@ export function createServerParamsForRoute(
         throw new InvariantError(
           'createServerParamsForRoute should not be called in cache contexts.'
         )
+      case 'prerender-runtime':
       case 'request':
         break
       default:
@@ -133,6 +139,7 @@ export function createServerParamsForServerSegment(
         throw new InvariantError(
           'createServerParamsForServerSegment should not be called in cache contexts.'
         )
+      case 'prerender-runtime':
       case 'request':
         break
       default:
@@ -171,6 +178,7 @@ export function createPrerenderParamsForClientSegment(
         )
       case 'prerender-ppr':
       case 'prerender-legacy':
+      case 'prerender-runtime':
       case 'request':
         break
       default:
@@ -186,7 +194,7 @@ export function createPrerenderParamsForClientSegment(
 function createPrerenderParams(
   underlyingParams: Params,
   workStore: WorkStore,
-  prerenderStore: PrerenderStore
+  prerenderStore: Exclude<PrerenderStore, PrerenderStoreModernDynamic>
 ): Promise<Params> {
   switch (prerenderStore.type) {
     case 'prerender':
@@ -578,6 +586,7 @@ function syncIODev(
         break
       case 'prerender':
       case 'prerender-client':
+      case 'prerender-runtime':
       case 'prerender-ppr':
       case 'prerender-legacy':
       case 'cache':
